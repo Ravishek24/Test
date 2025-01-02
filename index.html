@@ -266,7 +266,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formObject)
-                    mode: 'cors',
+                    mode: 'no-cors',
                 });
         
                 const result = await response.json();
