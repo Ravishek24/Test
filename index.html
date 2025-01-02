@@ -144,7 +144,7 @@
         let locationData = {};
 
         // Fetch all dropdown data from Google Apps Script
-        fetch('https://script.google.com/macros/s/AKfycbzEUkPrEjFflxHERIdPHx6__byel9z6umxTILNSHRK0Cm7leGBBjUfsJwD9GeQRT9-V/exec')
+        fetch('https://script.google.com/macros/s/AKfycbwr3ui8IOhHh_nWqduJTCqwz_33D5u0d67zf6lqaj6WvVFXW9DBRxHLiytK9IP8wtiu/exec')
             .then(response => response.json())
             .then(formData => {
                 // Store location data
@@ -260,7 +260,7 @@
                     formObject.images.push(await base64Promise);
                 }
         
-                const response = await fetch('https://script.google.com/macros/s/AKfycbzEUkPrEjFflxHERIdPHx6__byel9z6umxTILNSHRK0Cm7leGBBjUfsJwD9GeQRT9-V/exec', {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbwr3ui8IOhHh_nWqduJTCqwz_33D5u0d67zf6lqaj6WvVFXW9DBRxHLiytK9IP8wtiu/exec', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
