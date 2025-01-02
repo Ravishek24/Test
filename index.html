@@ -144,7 +144,7 @@
         let locationData = {};
 
         // Fetch all dropdown data from Google Apps Script
-        fetch('https://script.google.com/macros/s/AKfycbxaFmMFwgIC67TYMLYGC-TPOkuOKUNoF967T4ySCci4A-o-fuZMl9B6kDQpPqrbMf4/exec')
+        fetch('https://script.google.com/macros/s/AKfycbx1nfk6sZ88EHQZ8aXijqlZ-lTT6F0lccVFJd9Hcuk9l1WQ07IAsg-E_BLqw0WixDpt/exec')
             .then(response => response.json())
             .then(formData => {
                 // Store location data
@@ -229,27 +229,28 @@
         });
 
         // Form submission handler
+        // Replace your form submission code with this:
         document.getElementById('partyForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-
+        
             const submitButton = this.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.textContent = 'Submitting...';
             submitButton.disabled = true;
-
-            const formData = new FormData(this);
-            const formObject = {};
-            formData.forEach((value, key) => {
-                if (key !== 'images') {
-                    formObject[key] = value;
-                }
-            });
-
-            // Handle images
-            const imageFiles = formData.getAll('images');
-            formObject.images = [];
-
+        
             try {
+                const formData = new FormData(this);
+                const formObject = {};
+                formData.forEach((value, key) => {
+                    if (key !== 'images') {
+                        formObject[key] = value;
+                    }
+                });
+        
+                // Handle images
+                const imageFiles = formData.getAll('images');
+                formObject.images = [];
+        
                 for (const file of imageFiles) {
                     const base64Promise = new Promise((resolve) => {
                         const reader = new FileReader();
@@ -258,37 +259,28 @@
                     });
                     formObject.images.push(await base64Promise);
                 }
-
-                fetch('https://script.google.com/macros/s/AKfycbxaFmMFwgIC67TYMLYGC-TPOkuOKUNoF967T4ySCci4A-o-fuZMl9B6kDQpPqrbMf4/exec', {
+        
+                const response = await fetch('YOUR_DEPLOYED_SCRIPT_URL', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formObject)
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(result => {
-                        if (result.status === 'success') {
-                            alert('Data submitted successfully!');
-                        } else {
-                            alert('Error submitting data: ' + result.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error submitting data. Please try again.');
-                    });
-
-                this.reset();
-                document.getElementById('imagePreview').innerHTML = '';
+                });
+        
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    alert('Data submitted successfully!');
+                    this.reset();
+                    document.getElementById('imagePreview').innerHTML = '';
+                } else {
+                    throw new Error(result.message || 'Unknown error occurred');
+                }
+        
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error submitting data. Please try again.');
+                alert('Error submitting data: ' + error.message);
             } finally {
                 submitButton.textContent = originalButtonText;
                 submitButton.disabled = false;
