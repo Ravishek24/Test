@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <title>Party Details Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="partyForm">
+        <div class="form-group">
+            <label for="partyName">Name of Party</label>
+            <input type="text" id="partyName" name="partyName" required>
+        </div>
+
+        <div class="form-group">
+            <label for="mobileNo">Mobile No.</label>
+            <input type="tel" id="mobileNo" name="mobileNo" pattern="[0-9]{10}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="state">State</label>
+            <select id="state" name="state" required>
+                <option value="">Select State</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="district">District</label>
+            <select id="district" name="district" required>
+                <option value="">Select District</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="tehsil">Tehsil</label>
+            <select id="tehsil" name="tehsil" required>
+                <option value="">Select Tehsil</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="customerType">Type of Customer</label>
+            <select id="customerType" name="customerType" required>
+                <option value="">Select Type</option>
+                <option value="retail">Retail</option>
+                <option value="wholesale">Wholesale</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="">Select Category</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="productInterest">Product Interest</label>
+            <select id="productInterest" name="productInterest" required>
+                <option value="">Select Product Interest</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="salesPerson">Sales Person</label>
+            <select id="salesPerson" name="salesPerson" required>
+                <option value="">Select Sales Person</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="review">Review</label>
+            <select id="review" name="review" required>
+                <option value="">Select Review</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="images">Upload Images</label>
+            <input type="file" id="images" name="images" multiple accept="image/*">
+            <div id="imagePreview" class="image-preview"></div>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        // Declare global variable for location data
+        let locationData = {};
+
+        // Fetch all dropdown data from Google Apps Script
+        fetch('https://script.google.com/macros/s/AKfycbwbs84gkXRIoDxkSftrsccfxWO66n-PvgMaymOj7Z-QWN0Q2oPNcewdSByFVrckyIUS/exec')
+            .then(response => response.json())
+            .then(formData => {
+                // Store location data
+                locationData = formData.locations;
+
+                // Populate state dropdown
+                const stateSelect = document.getElementById('state');
+                Object.keys(locationData).forEach(state => {
+                    stateSelect.add(new Option(state, state));
+                });
+
+                // Populate other dropdowns
+                formData.customerTypes.forEach(type => {
+                    document.getElementById('customerType').add(new Option(type, type));
+                });
+
+                formData.categories.forEach(category => {
+                    document.getElementById('category').add(new Option(category, category));
+                });
+
+                formData.products.forEach(product => {
+                    document.getElementById('productInterest').add(new Option(product, product));
+                });
+
+                formData.salesPersons.forEach(person => {
+                    document.getElementById('salesPerson').add(new Option(person, person));
+                });
+
+                formData.reviews.forEach(review => {
+                    document.getElementById('review').add(new Option(review, review));
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+        // Update districts when state changes
+        document.getElementById('state').addEventListener('change', function () {
+            const districtSelect = document.getElementById('district');
+            const tehsilSelect = document.getElementById('tehsil');
+
+            // Clear existing options
+            districtSelect.innerHTML = '<option value="">Select District</option>';
+            tehsilSelect.innerHTML = '<option value="">Select Tehsil</option>';
+
+            if (this.value && locationData[this.value]) {
+                const districts = Object.keys(locationData[this.value]);
+                districts.forEach(district => {
+                    districtSelect.add(new Option(district, district));
+                });
+            }
+        });
+
+        // Update tehsils when district changes
+        document.getElementById('district').addEventListener('change', function () {
+            const tehsilSelect = document.getElementById('tehsil');
+            const selectedState = document.getElementById('state').value;
+
+            // Clear existing options
+            tehsilSelect.innerHTML = '<option value="">Select Tehsil</option>';
+
+            if (this.value && locationData[selectedState][this.value]) {
+                const tehsils = locationData[selectedState][this.value];
+                tehsils.forEach(tehsil => {
+                    const option = new Option(tehsil, tehsil);
+                    tehsilSelect.add(option);
+                });
+            }
+        });
+
+        // Preview images
+        document.getElementById('images').addEventListener('change', function (e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            [...e.target.files].forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Form submission handler
+        document.getElementById('partyForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.textContent = 'Submitting...';
+            submitButton.disabled = true;
+
+            const formData = new FormData(this);
+            const formObject = {};
+            formData.forEach((value, key) => {
+                if (key !== 'images') {
+                    formObject[key] = value;
+                }
+            });
+
+            // Handle images
+            const imageFiles = formData.getAll('images');
+            formObject.images = [];
+
+            try {
+                for (const file of imageFiles) {
+                    const base64Promise = new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                    formObject.images.push(await base64Promise);
+                }
+
+                fetch('https://script.google.com/macros/s/AKfycbwbs84gkXRIoDxkSftrsccfxWO66n-PvgMaymOj7Z-QWN0Q2oPNcewdSByFVrckyIUS/exec', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formObject)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.status === 'success') {
+                            alert('Data submitted successfully!');
+                        } else {
+                            alert('Error submitting data: ' + result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error submitting data. Please try again.');
+                    });
+
+                this.reset();
+                document.getElementById('imagePreview').innerHTML = '';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting data. Please try again.');
+            } finally {
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
